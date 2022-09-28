@@ -1,0 +1,50 @@
+<!-- dwitter/templates/dwitter/profile_list.html -->
+
+<!-- ... -->
+{% extends 'base.html' %}
+{% block content %}
+<div class="columns container mt-1">
+    <div class="column is-three-quarters">
+        <h1 class="title is-1">{{ user }}'s Dweets</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="buttons has-addons">
+                {% if profile in user.profile.follows.all %}
+                <button class="button is-success is-static">Follow</button>
+                <button class="button is-danger" name="follow" value="unfollow">Unfollow</button>
+                {% else %}
+                <button class="button is-success" name="follow" value="follow">Follow</button>
+                <button class="button is-danger is-static">Unfollow</button>
+                {% endif %}
+            </div>
+        </form>
+        {% for dweet in profile.user.dweets.all %}
+        <div class="box mt-2">
+            {{ dweet.body }}
+            <span class="is-small has-text-grey-light">
+                ({{ dweet.created_at }})
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="column">
+        <a href="{% url 'dwitter:profile_list' %}">
+            <button class="button is-dark is-outlined is-fullwidth">
+                All Profiles
+            </button>
+        </a>
+        <p class="title is-4 mb-1">{{user}} follows:</p>
+        <ul>
+            {% for user in profile.follows.all %}
+            <li><a href="/profile/{{user.id}}">@{{ user|lower }}</a></li>
+            {% endfor %}
+        </ul>
+        <p class="title is-4 mb-1">{{user}} is followed by:</p>
+        <ul>
+            {% for name in profile.followed_by.all %}
+            <li><a href="/profile/{{name.id}}">@{{ name|lower }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock content %}
