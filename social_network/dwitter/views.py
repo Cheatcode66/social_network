@@ -1,18 +1,20 @@
 from django.shortcuts import render,redirect
-from .forms import DweetForm
-from .models import Profile,User
+from .forms import DweetForm, LoginForm
+from .models import Profile,User,Dweet
 
 # Create your views here.
 def dashboard(request):
     form = DweetForm(request.POST or None)
     if request.method == 'POST':
-        
         if form.is_valid():
             dweet = form.save(commit=False)
             dweet.user = request.user
             dweet.save()
             return redirect("dwitter:dashboard")
-    return render(request,"dwitter/dashboard.html",{'form':form})
+    followed_dweets = Dweet.objects.filter(
+        user__profile__in=request.user.profile.follows.all()
+    ).order_by("-created_at")
+    return render(request,"dwitter/dashboard.html",{'form':form,"dweets": followed_dweets})
 def profile_list(request):
     profiles = Profile.objects.exclude(user=request.user)
     return render(request, "dwitter/profile_list.html", {"profiles": profiles})
@@ -35,3 +37,5 @@ def profile(request,pk):
         "user": user,
         "profile" : profile,
     })
+def login(request):
+    return render(request,"dwitter/login.html")
